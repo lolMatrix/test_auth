@@ -1,9 +1,10 @@
 <? include "html/header.php";?>
-<div class="auth container-sm">
-
-<form class="mt-5" id="login" action="/ajax?auth=reg" method="post">
-   <span id="error"></span>
-   <br>
+<div class="auth container-sm mt-5">
+    <span id="error"  role="alert"></span>
+<form class="mt-3" id="login" action="/ajax?auth=reg" method="post">
+  
+   
+   
     <lable class="mt-2">Логин</lable>
     <input class="form-control mt-2" required="required" type="text" name="login">
     <lable class="mt-2">E-mail</lable>
@@ -53,8 +54,15 @@
             success: function (e){
                 if (e == "success")
                     location.href = "/";
-                else
-                    console.log(e);
+                else{
+                    $("#error").text(e);
+                    $("#error").attr("class", "alert mb-3 alert-danger");
+                    $('#error').show(1000, function(){
+                    setTimeout(function(){
+                        $('#error').hide(500);
+                    }, 5000);
+                });
+                }
         }
         })
     });
@@ -64,6 +72,7 @@ function success (e){
         location.href = "/";
     else{
         $("#error").text(e);
+        $("#error").attr("class", "alert mt-5 alert-danger");
         $('#error').show(1000, function(){
             setTimeout(function(){
                 $('#error').hide(500);

@@ -12,9 +12,25 @@ function login($login, $pass){
     mysqli_close($connect);
     
     if($arr == null){
+        if (isset($_SESSION["wrong_count"])){
+            $_SESSION["wrong_count"]++;
+        }else{
+            $_SESSION["wrong_count"] = 1;
+        }
+        if($_SESSION["wrong_count"] == 3)
+            exit("captcha");
         echo "Такого аккаунта не существует";
     }
     else if(md5($pass) !== $arr["pass"]){
+        if (isset($_SESSION["wrong_count"])){
+            $_SESSION["wrong_count"]++;
+        }else{
+            $_SESSION["wrong_count"] = 1;
+        }
+        
+        if($_SESSION["wrong_count"] == 3)
+            exit("captcha");
+
         echo "Неправильный логин или пароль";
     }else{
         $_SESSION["id"] = $arr["id"];
@@ -105,4 +121,39 @@ function getInform($id){
     mysqli_close($connect);
     return $arr;
     
+}
+function socialUpdate($id, $uid, $network){
+    global $login_db, $password_db, $host, $bd;
+    $connect = mysqli_connect($host, $login_db, $password_db,  $bd);
+
+    $query = "SELECT * FROM social WHERE $network = '$uid' AND id != '$id'";
+    $result = mysqli_query($connect, $query);
+    $arr = mysqli_fetch_array($result);
+    
+    if($arr != null){
+        $query = "DELETE FROM social WHERE id = '".$arr['id']."'";
+        $result = mysqli_query($connect, $query);
+        $query = "DELETE FROM users WHERE id = '".$arr['id']."'";
+        $result = mysqli_query($connect, $query);
+    }
+    
+    
+    
+    $query = "SELECT * FROM users INNER JOIN social ON users.id = social.id WHERE social.id = '$id'";
+    
+    $result = mysqli_query($connect, $query);
+    $arr = mysqli_fetch_array($result);
+    
+    
+    if($arr == null){
+        $query = "INSERT INTO social (`id`, `$network`) VALUES ('$id', '$uid')";
+        $result = mysqli_query($connect, $query);
+        echo "success";
+    }else{
+        $query = "UPDATE social SET $network = '$uid' WHERE id = '$id'";
+        $result = mysqli_query($connect, $query);
+        echo "success";
+    }
+    
+    mysqli_close($connect);
 }
